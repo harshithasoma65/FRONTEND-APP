@@ -36,10 +36,10 @@ function Content() {
             <p>{product.desc}</p>
             <h4>{product.price}</h4>
             <p><button>Add to Cart</button></p>
-          </div>
+        </div>
         ))}
-      </div>
     </div>
-  );
+    </div>
+ );
 }
 export default Content;
