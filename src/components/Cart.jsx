@@ -15,9 +15,11 @@ function Orders() {
         headers: { Authorization: `Bearer ${user.token}` },
       });
 
-      setOrders(response.data.orders);   // ✅ FIX
+      console.log(response.data);
+
+      setOrders(response.data.orders || []);
     } catch (err) {
-      console.log("Something went wrong");
+      console.log("Something went wrong", err);
     }
   };
 
@@ -31,26 +33,24 @@ function Orders() {
     <div>
       <h1>My Orders</h1>
 
-      <div>
-        {orders &&
-          orders.map((order) => (
-            <div key={order._id}>
-              <h3>Order Id: {order.orderDate}</h3>
+      {Array.isArray(orders) &&
+        orders.map((order) => (
+          <div key={order._id}>
+            <h3>Order Id: {order.orderDate}</h3>
 
-              <ol>
-                {order.items.map((item) => (
-                  <li key={item._id}>
-                    {item.name}-{item.price}-{item.quantity}-
-                    {item.price * item.quantity}
-                  </li>
-                ))}
-              </ol>
+            <ol>
+              {order.items.map((item) => (
+                <li key={item._id}>
+                  {item.name}-{item.price}-{item.quantity}-
+                  {item.price * item.quantity}
+                </li>
+              ))}
+            </ol>
 
-              <h3>Order Value: {order.orderValue}</h3>
-              <hr />
-            </div>
-          ))}
-      </div>
+            <h3>Order Value: {order.orderValue}</h3>
+            <hr />
+          </div>
+        ))}
     </div>
   );
 }
