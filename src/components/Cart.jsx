@@ -1,91 +1,58 @@
-import { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../App";
 import axios from "axios";
 
-function Cart() {
-  const { cart, setCart, user } = useContext(AppContext);
-  const [orderValue, setOrderValue] = useState(0);
+function Orders() {
   const API_URL = import.meta.env.VITE_API_URL;
+  const { user } = useContext(AppContext);
+  const [orders, setOrders] = useState([]);
 
-  const navigate = useNavigate();
+  const fetchOrders = async () => {
+    try {
+      const url = `${API_URL}/orders/${user.email}`;
 
-  const increment = (id) => {
-    setCart(
-      cart.map((item) =>
-        item._id === id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
-    );
-  };
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
 
-  const decrement = (id) => {
-    setCart(
-      cart.map((item) =>
-        item._id === id && item.quantity > 0
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-  };
-
-  useEffect(() => {
-    setOrderValue(
-      cart.reduce((sum, item) => sum + item.quantity * item.price, 0)
-    );
-  }, [cart]);
-
-  const placeOrder = async () => {
-    if (user?.email) {
-      const url = `${API_URL}/orders`;
-
-      const order = {
-        email: user.email,
-        items: cart,
-        orderValue: orderValue,
-        orderDate: Date.now(),
-      };
-
-      await axios.post(url, order);
-
-      setCart([]);
-
-      navigate("/orders");
+      setOrders(response.data.orders);   // ✅ FIX
+    } catch (err) {
+      console.log("Something went wrong");
     }
   };
 
+  useEffect(() => {
+    if (user?.email) {
+      fetchOrders();
+    }
+  }, [user]);
+
   return (
     <div>
-      <h1>My Cart</h1>
+      <h1>My Orders</h1>
 
-      <ol>
-        {cart && cart.map((item) => (
-          <li key={item._id}>
-            {item.name}-{item.price}
-            <button onClick={() => decrement(item._id)}>-</button>
-            {item.quantity}
-            <button onClick={() => increment(item._id)}>+</button>
-            -{item.quantity * item.price}
-          </li>
-        ))}
-      </ol>
+      <div>
+        {orders &&
+          orders.map((order) => (
+            <div key={order._id}>
+              <h3>Order Id: {order.orderDate}</h3>
 
-      <p>
-        <strong>Order Value: {orderValue}</strong>
-      </p>
+              <ol>
+                {order.items.map((item) => (
+                  <li key={item._id}>
+                    {item.name}-{item.price}-{item.quantity}-
+                    {item.price * item.quantity}
+                  </li>
+                ))}
+              </ol>
 
-      <p>
-        {user?.email ? (
-          <button onClick={placeOrder}>Place Order</button>
-        ) : (
-          <button onClick={() => navigate("/login")}>
-            Login to Order
-          </button>
-        )}
-      </p>
+              <h3>Order Value: {order.orderValue}</h3>
+              <hr />
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
 
-export default Cart;
+export default Orders;
