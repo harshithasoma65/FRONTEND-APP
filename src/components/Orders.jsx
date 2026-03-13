@@ -1,7 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../App";
 import axios from "axios";
-
 function Orders() {
   const API_URL = import.meta.env.VITE_API_URL;
   const { user } = useContext(AppContext);
@@ -10,48 +9,41 @@ function Orders() {
   const fetchOrders = async () => {
     try {
       const url = `${API_URL}/orders/${user.email}`;
-
       const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
-
-      console.log(response.data);
-
-      setOrders(response.data.orders || response.data || []);
+      setOrders(response.data);
     } catch (err) {
-      console.log("Something went wrong", err);
+      console.log("Something went wrong");
     }
   };
 
   useEffect(() => {
-    if (user?.email) {
-      fetchOrders();
-    }
-  }, [user]);
+    fetchOrders();
+  }, []);
 
   return (
     <div>
       <h1>My Orders</h1>
-
-      {(orders || []).map((order) => (
-        <div key={order._id}>
-          <h3>Order Id: {order.orderDate}</h3>
-
-          <ol>
-            {(order.items || []).map((item) => (
-              <li key={item._id}>
-                {item.name}-{item.price}-{item.quantity}-
-                {item.price * item.quantity}
-              </li>
-            ))}
-          </ol>
-
-          <h3>Order Value: {order.orderValue}</h3>
-          <hr />
-        </div>
-      ))}
+      <div>
+        {orders &&
+          orders.map((order) => (
+            <div key={order._id}>
+              <h3>Order Id: {order.orderDate}</h3>
+              <ol>
+                {order.items.map((item) => (
+                  <li key={item._id}>
+                    {item.name}-{item.price}-{item.quantity}-
+                    {item.price * item.quantity}
+                  </li>
+                ))}
+              </ol>
+              <h3>Order Value: {order.orderValue}</h3>
+              <hr />
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
-
 export default Orders;
