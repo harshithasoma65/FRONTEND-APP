@@ -73,7 +73,7 @@ function Cart() {
       </p>
       <p>
         {user?.email ?  <button onClick={placeOrder}>Place Order</button> :  <button onClick={()=>Navigate("/login")}>Login to Order</button> }
-      
+       
       </p>
     </div>
   );
